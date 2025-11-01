@@ -7,7 +7,6 @@ import {
   Box,
   Button,
   Container,
-  Divider,
   FormControl,
   FormLabel,
   IconButton,
@@ -16,35 +15,35 @@ import {
   Typography,
   Stack,
   CircularProgress,
-  Link,
   useTheme,
   Paper,
+  Link,
 } from "@mui/material";
-import { FcGoogle } from "react-icons/fc";
-import { FaGithub } from "react-icons/fa";
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import { toast } from "react-hot-toast";
 
 export default function LoginPage() {
-  const [email, setEmail] = useState<string>("");
-  const [password, setPassword] = useState<string>("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [loading, setLoading] = useState<boolean>(false);
-
+  const [loading, setLoading] = useState(false);
   const router = useRouter();
   const theme = useTheme();
 
   const handleLogin = async () => {
-    setLoading(true);
+    if (!email || !password) {
+      toast.error("Please enter both email and password");
+      return;
+    }
 
+    setLoading(true);
     const res = await signIn("credentials", {
       email,
       password,
       redirect: true,
       callbackUrl: "/redirect",
     });
-
     setLoading(false);
 
     if (res?.error) {
@@ -54,42 +53,64 @@ export default function LoginPage() {
 
   return (
     <Container
-      maxWidth="sm"
+      maxWidth="xs"
       sx={{
         minHeight: "100vh",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        backgroundColor: theme.palette.mode === "light" ? "#f8f9fa" : "#121212",
+        backgroundColor:
+          theme.palette.mode === "light" ? "#ffffff" : "#0f0f0f",
       }}
     >
       <Paper
-        elevation={3}
+        elevation={2}
         sx={{
-          p: 5,
-          borderRadius: 3,
-          textAlign: "center",
           width: "100%",
+          p: 5,
+          borderRadius: 0,
+          backgroundColor:
+            theme.palette.mode === "light"
+              ? "rgba(255,255,255,0.95)"
+              : "rgba(255,255,255,0.05)",
+          boxShadow:
+            theme.palette.mode === "light"
+              ? "0px 2px 12px rgba(0,0,0,0.08)"
+              : "0px 2px 16px rgba(0,0,0,0.3)",
         }}
       >
-        <Typography variant="h5" fontWeight={600} gutterBottom>
-          Log in to continue
-        </Typography>
+        <Stack spacing={3} textAlign="center">
+          <Typography
+            variant="h5"
+            fontWeight={700}
+            color="text.primary"
+            gutterBottom
+          >
+            Welcome to MarkSync
+          </Typography>
 
-        <Stack spacing={3} mt={3}>
-          {/* Email Field */}
-          <FormControl fullWidth>
+          <Typography
+            variant="body2"
+            color="text.secondary"
+            sx={{ mb: 2, mt: -1 }}
+          >
+            Sign in to access your dashboard
+          </Typography>
+
+          {/* Email */}
+          <FormControl fullWidth >
             <FormLabel>Email</FormLabel>
             <TextField
               type="email"
               placeholder="you@example.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+              size="medium"
               fullWidth
             />
           </FormControl>
 
-          {/* Password Field */}
+          {/* Password */}
           <FormControl fullWidth>
             <FormLabel>Password</FormLabel>
             <TextField
@@ -97,6 +118,7 @@ export default function LoginPage() {
               placeholder="••••••••"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              size="medium"
               InputProps={{
                 endAdornment: (
                   <InputAdornment position="end">
@@ -118,50 +140,36 @@ export default function LoginPage() {
             variant="contained"
             fullWidth
             size="large"
-            sx={{ mt: 1 }}
+            sx={{
+              mt: 1,
+              py: 1.2,
+              fontWeight: 600,
+              textTransform: "none",
+            }}
             disabled={loading}
           >
-            {loading ? <CircularProgress size={24} /> : "Continue"}
+            {loading ? <CircularProgress size={24} /> : "Sign In"}
           </Button>
 
-          <Divider>or continue with</Divider>
-
-          <Stack spacing={2}>
-            <Button
-              variant="outlined"
-              startIcon={<FcGoogle />}
-              onClick={() => signIn("google", { callbackUrl: "/dashboard" })}
-              fullWidth
-            >
-              Google
-            </Button>
-            <Button
-              variant="outlined"
-              startIcon={<FaGithub />}
-              onClick={() => signIn("github", { callbackUrl: "/dashboard" })}
-              fullWidth
-            >
-              GitHub
-            </Button>
-          </Stack>
-
-          <Typography variant="body2" mt={3}>
-            <Link
-              component="button"
-              underline="hover"
-              onClick={() => router.push("/forgot-password")}
-            >
-              Can't log in?
-            </Link>{" "}
-            •{" "}
-            <Link
-              component="button"
-              underline="hover"
-              onClick={() => router.push("/signup")}
-            >
-              Create an account
-            </Link>
-          </Typography>
+          <Box mt={1}>
+            <Typography variant="body2" color="text.secondary">
+              <Link
+                component="button"
+                underline="hover"
+                onClick={() => router.push("/forgot-password")}
+              >
+                Forgot Password?
+              </Link>{" "}
+              •{" "}
+              <Link
+                component="button"
+                underline="hover"
+                onClick={() => router.push("/signup")}
+              >
+                Create Account
+              </Link>
+            </Typography>
+          </Box>
         </Stack>
       </Paper>
     </Container>

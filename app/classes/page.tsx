@@ -17,6 +17,7 @@ import {
   Button,
   Divider,
 } from "@mui/material";
+import { motion } from "framer-motion";
 
 interface ClassData {
   _id: string;
@@ -28,12 +29,8 @@ interface ClassData {
     endTime: string;
     room: string;
   };
-  timing?: string;
   status?: "On Time" | "Cancelled" | "Rescheduled";
-  location?: {
-    latitude: number;
-    longitude: number;
-  };
+  location?: { latitude: number; longitude: number };
   allowedRadius?: number;
 }
 
@@ -49,7 +46,7 @@ interface SnackbarState {
   severity: "success" | "error" | "warning" | "info";
 }
 
-// Utility: time format
+// Time formatting
 const formatTime = (time: string): string => {
   if (!time) return "TBA";
   try {
@@ -63,16 +60,13 @@ const formatTime = (time: string): string => {
   }
 };
 
-// Utility: schedule format
+// Schedule formatting
 const formatSchedule = (classItem: ClassData): string => {
-  if (classItem.timing) return classItem.timing;
-  if (classItem.schedule && classItem.schedule.dayOfWeek) {
-    const day = classItem.schedule.dayOfWeek.substring(0, 3);
-    return `${day} ${formatTime(classItem.schedule.startTime)} - ${formatTime(
-      classItem.schedule.endTime
-    )}`;
-  }
-  return "Schedule not available";
+  if (!classItem.schedule) return "No schedule";
+  const { dayOfWeek, startTime, endTime } = classItem.schedule;
+  return `${dayOfWeek.slice(0, 3)} ${formatTime(startTime)} - ${formatTime(
+    endTime
+  )}`;
 };
 
 export default function Home() {
@@ -85,37 +79,19 @@ export default function Home() {
   });
   const router = useRouter();
 
-  // Fetch from API
-  const fetchClassesFromAPI = async (): Promise<ClassData[]> => {
-    try {
-      const res = await fetch("/api/classes");
-      const result: ApiResponse = await res.json();
-      if (!result.success) throw new Error(result.error);
-      return result.data;
-    } catch (err) {
-      throw err;
-    }
-  };
-
   useEffect(() => {
     const loadData = async () => {
       try {
-        const data = await fetchClassesFromAPI();
-        setClasses(data);
-        if (data.length === 0) {
-          setSnackbar({
-            open: true,
-            message: "No classes found.",
-            severity: "info",
-          });
-        }
-      } catch (error) {
+        const res = await fetch("/api/classes");
+        const result: ApiResponse = await res.json();
+        if (!result.success) throw new Error(result.error);
+        setClasses(result.data);
+      } catch {
         setSnackbar({
           open: true,
-          message: "Failed to load classes. Please check your API.",
+          message: "Unable to load classes. Please try again.",
           severity: "error",
         });
-        setClasses([]);
       } finally {
         setLoading(false);
       }
@@ -137,7 +113,16 @@ export default function Home() {
         ? "error"
         : "warning";
     return (
-      <Chip label={status} color={color} sx={{ mt: 1, fontWeight: 500 }} />
+      <Chip
+        label={status}
+        color={color}
+        sx={{
+          mt: 1,
+          fontWeight: 500,
+          borderRadius: 0,
+          textTransform: "uppercase",
+        }}
+      />
     );
   };
 
@@ -145,37 +130,37 @@ export default function Home() {
     <Box
       sx={{
         flexGrow: 1,
-        p: { xs: 2, sm: 3, md: 4 },
-        backgroundColor: "#f5f7fa",
+        p: { xs: 1, sm: 2, md: 3 },
+        bgcolor: "background.default",
         minHeight: "100vh",
       }}
     >
       {/* Header */}
       <Paper
-        elevation={3}
+        elevation={2}
         sx={{
           p: 3,
           mb: 4,
-          textAlign: "center",
-          borderRadius: 3,
-          background: "linear-gradient(135deg, #1976d2, #42a5f5)",
-          color: "white",
-          boxShadow: "0 4px 10px rgba(0,0,0,0.1)",
+          textAlign: "left",
+          bgcolor: "primary.main",
+          color: "primary.contrastText",
+          borderRadius: 0,
+          boxShadow: "0 2px 6px rgba(0,0,0,0.15)",
         }}
       >
-        <Typography variant="h4" fontWeight="bold">
-          BSCS Fall 2025 Classes
+        <Typography variant="subtitle1" sx={{ mt: 1, opacity: 0.9 }}>
+          BS-CS Fall 2025 Classes
         </Typography>
-        <Typography variant="body2" sx={{ mt: 1, opacity: 0.8 }}>
+        <Typography variant="body2" sx={{ mt: 1 }}>
           {loading
-            ? "Loading..."
-            : `${classes.length} class${
+            ? "Loading classes..."
+            : `${classes.length} ongoing class${
                 classes.length !== 1 ? "es" : ""
-              } found`}
+              } available`}
         </Typography>
       </Paper>
 
-      {/* Loading */}
+      {/* Loading Indicator */}
       {loading ? (
         <Box
           sx={{
@@ -189,69 +174,63 @@ export default function Home() {
         </Box>
       ) : (
         <>
-          {/* Class Grid */}
+          {/* Classes Grid */}
           <Grid container spacing={3}>
             {classes.map((classItem) => (
               <Grid item xs={12} sm={6} md={4} key={classItem._id}>
-                <Card
-                  onClick={() => handleClassClick(classItem._id)}
-                  elevation={4}
-                  sx={{
-                    height: "100%",
-                    display: "flex",
-                    flexDirection: "column",
-                    justifyContent: "space-between",
-                    borderRadius: 3,
-                    cursor: "pointer",
-                    transition: "transform 0.25s ease, box-shadow 0.25s ease",
-                    "&:hover": {
-                      transform: "translateY(-6px)",
-                      boxShadow: "0 8px 20px rgba(0,0,0,0.12)",
-                    },
-                    background: "white",
-                  }}
+                <motion.div
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.99 }}
                 >
-                  <CardContent sx={{ flexGrow: 1 }}>
-                    <Typography
-                      variant="h6"
-                      component="div"
-                      fontWeight={600}
-                      gutterBottom
-                      color="primary"
-                    >
-                      {classItem.name}
-                    </Typography>
+                  <Card
+                    onClick={() => handleClassClick(classItem._id)}
+                    elevation={3}
+                    sx={{
+                      borderRadius: 0,
+                      cursor: "pointer",
+                      height: "100%",
+                      bgcolor: "background.paper",
+                      border: "1px solid",
+                      borderColor: "divider",
+                      transition: "all 0.2s ease-in-out",
+                      "&:hover": {
+                        boxShadow: "0 4px 14px rgba(0,0,0,0.1)",
+                        bgcolor: "action.hover",
+                      },
+                    }}
+                  >
+                    <CardContent>
+                      <Typography
+                        variant="h6"
+                        fontWeight={700}
+                        color="primary"
+                        gutterBottom
+                        noWrap
+                      >
+                        {classItem.name}
+                      </Typography>
 
-                    <Typography
-                      sx={{ mb: 1 }}
-                      color="text.secondary"
-                      fontWeight={500}
-                    >
-                      Code: {classItem.code}
-                    </Typography>
-
-                    <Divider sx={{ my: 1.5 }} />
-
-                    <Typography variant="body2" color="text.secondary">
-                      Timing: {formatSchedule(classItem)}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      Room: {classItem.schedule?.room || "TBA"}
-                    </Typography>
-
-                    {/* {classItem.location && (
                       <Typography
                         variant="body2"
                         color="text.secondary"
-                        sx={{ mt: 0.5 }}
+                        fontWeight={500}
                       >
-                        Radius: {classItem.allowedRadius || 30}m
+                        Code: {classItem.code}
                       </Typography>
-                    )} */}
 
-                    {getStatusChip(classItem.status)}
-                  </CardContent>
-                </Card>
+                      <Divider sx={{ my: 1.5 }} />
+
+                      <Typography variant="body2" color="text.secondary">
+                        {formatSchedule(classItem)}
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        Room: {classItem.schedule?.room || "TBA"}
+                      </Typography>
+
+                      {getStatusChip(classItem.status)}
+                    </CardContent>
+                  </Card>
+                </motion.div>
               </Grid>
             ))}
           </Grid>
@@ -259,26 +238,29 @@ export default function Home() {
           {/* Empty State */}
           {classes.length === 0 && (
             <Paper
+              elevation={0}
               sx={{
                 mt: 6,
                 textAlign: "center",
-                p: 5,
-                borderRadius: 3,
-                boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
+                p: 6,
+                borderRadius: 0,
+                bgcolor: "background.paper",
+                border: "1px dashed",
+                borderColor: "divider",
               }}
             >
-              <Typography variant="h6" color="text.secondary">
+              <Typography variant="h6" color="text.secondary" fontWeight={600}>
                 No Classes Available
               </Typography>
               <Typography variant="body2" sx={{ mt: 1, opacity: 0.8 }}>
-                It looks like there are no classes in your database.
+                It seems there are no classes scheduled yet.
               </Typography>
               <Button
                 variant="contained"
-                sx={{ mt: 2 }}
+                sx={{ mt: 3, borderRadius: 0, px: 4 }}
                 onClick={() => window.location.reload()}
               >
-                Retry
+                Refresh
               </Button>
             </Paper>
           )}
@@ -288,14 +270,14 @@ export default function Home() {
       {/* Snackbar */}
       <Snackbar
         open={snackbar.open}
-        autoHideDuration={5000}
+        autoHideDuration={4000}
         onClose={handleCloseSnackbar}
         anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
       >
         <Alert
           onClose={handleCloseSnackbar}
           severity={snackbar.severity}
-          sx={{ width: "100%" }}
+          sx={{ width: "100%", borderRadius: 0 }}
         >
           {snackbar.message}
         </Alert>

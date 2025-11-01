@@ -288,13 +288,13 @@ export default function ClassDetailPage() {
       }}
     >
       <Paper
-        elevation={4}
+        elevation={2}
         sx={{
-          padding: 4,
-          borderRadius: 3,
+          padding: 8,
+          borderRadius: 1,
           maxWidth: 700,
           margin: "auto",
-          background: "#fff",
+          background: "#fffff",
         }}
       >
         <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
@@ -325,8 +325,8 @@ export default function ClassDetailPage() {
             <Typography color="text.secondary">
               {/* Lat: {classData.location.latitude.toFixed(6)} | Lon:{" "} */}
               {/* {classData.location.longitude.toFixed(6)} | Radius:{" "} */}
-              Mark Attendance within {classData.allowedRadius || 30}m of classroom | Room:{" "}
-              {classData.schedule.room || "TBA"}
+              Mark Attendance within {classData.allowedRadius || 30}m of
+              classroom | Room: {classData.schedule.room || "TBA"}
             </Typography>
           </Box>
         )}

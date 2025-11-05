@@ -22,43 +22,9 @@ import LocationOnIcon from "@mui/icons-material/LocationOn";
 import ScheduleIcon from "@mui/icons-material/Schedule";
 import HourglassEmptyIcon from "@mui/icons-material/HourglassEmpty";
 import CancelIcon from "@mui/icons-material/Cancel";
+import {ClassData, ApiResponse, SnackbarState, AttendanceStatusResponse} from "@/types/types";
 
-interface ClassData {
-  _id: string;
-  name: string;
-  code: string;
-  schedule: {
-    dayOfWeek: string;
-    startTime: string;
-    endTime: string;
-    room: string;
-  };
-  location?: {
-    latitude: number;
-    longitude: number;
-  };
-  allowedRadius?: number;
-  status?: "On Time" | "Cancelled" | "Rescheduled";
-}
-
-interface ApiResponse {
-  success: boolean;
-  data?: ClassData;
-  error?: string;
-}
-
-interface AttendanceStatusResponse {
-  success: boolean;
-  data?: { isPresent: boolean };
-  error?: string;
-}
-
-interface SnackbarState {
-  open: boolean;
-  message: string;
-  severity: "success" | "error" | "warning" | "info";
-}
-
+// Time formatting
 const formatTime = (time: string): string => {
   if (!time) return "TBA";
   const [hours, minutes] = time.split(":");
@@ -93,7 +59,7 @@ const fetchClassDetails = async (id: string): Promise<ClassData> => {
   const result: ApiResponse = await response.json();
   if (!result.success || !result.data)
     throw new Error(result.error ?? "Unknown error");
-  return result.data;
+  return result.data as ClassData;
 };
 
 export default function ClassDetailPage(): JSX.Element {

@@ -13,7 +13,7 @@ import {
 } from "@mui/material";
 import type { SelectChangeEvent } from "@mui/material/Select";
 import * as XLSX from "xlsx";
-import ClassData from "@/types/ClassData";
+import {ClassData} from "@/types/types";
 
 interface SelectedClass {
   _id: string;

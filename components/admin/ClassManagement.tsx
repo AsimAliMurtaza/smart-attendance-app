@@ -21,24 +21,7 @@ import {
 import Grid from "@mui/material/GridLegacy";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
-import ClassData from "@/types/ClassData";
-
-type ClassForm = {
-  _id?: string;
-  name: string;
-  code: string;
-  allowedRadius: number;
-  location: {
-    latitude: number;
-    longitude: number;
-  };
-  schedule: {
-    dayOfWeek: string;
-    startTime: string;
-    endTime: string;
-    room: string;
-  };
-};
+import { ClassData, ClassForm } from "@/types/types";
 
 export default function ClassManagement() {
   const [classes, setClasses] = useState<ClassData[]>([]);
@@ -114,7 +97,7 @@ export default function ClassManagement() {
 
   const handleEdit = (cls: ClassData) => {
     setEditMode(true);
-    setForm(cls);
+    setForm(cls as ClassForm);
     setOpenDialog(true);
   };
 

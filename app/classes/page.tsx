@@ -18,33 +18,7 @@ import {
 } from "@mui/material";
 import Grid from "@mui/material/GridLegacy";
 import { motion } from "framer-motion";
-
-interface ClassData {
-  _id: string;
-  name: string;
-  code: string;
-  schedule?: {
-    dayOfWeek: string;
-    startTime: string;
-    endTime: string;
-    room: string;
-  };
-  status?: "On Time" | "Cancelled" | "Rescheduled";
-  location?: { latitude: number; longitude: number };
-  allowedRadius?: number;
-}
-
-interface ApiResponse {
-  success: boolean;
-  data: ClassData[];
-  error?: string;
-}
-
-interface SnackbarState {
-  open: boolean;
-  message: string;
-  severity: "success" | "error" | "warning" | "info";
-}
+import { ClassData, ApiResponse, SnackbarState } from "@/types/types";
 
 // Time formatting
 const formatTime = (time: string): string => {
@@ -85,7 +59,7 @@ export default function Home() {
         const res = await fetch("/api/classes");
         const result: ApiResponse = await res.json();
         if (!result.success) throw new Error(result.error);
-        setClasses(result.data);
+        setClasses(result.data as ClassData[]);
       } catch {
         setSnackbar({
           open: true,

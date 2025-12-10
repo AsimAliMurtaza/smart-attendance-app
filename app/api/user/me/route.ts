@@ -4,9 +4,6 @@ import { authOptions } from "../../auth/[...nextauth]/options";
 import dbConnect from "@/libs/mongodb";
 import User from "@/models/User";
 
-// ========================
-// ✅ GET Logged-in User
-// ========================
 export async function GET() {
   try {
     const session = await getServerSession(authOptions);
@@ -36,6 +33,7 @@ export async function GET() {
       data: user,
     });
   } catch (error) {
+    console.error("Error fetching profile:", error);
     return NextResponse.json(
       { success: false, error: "Failed to fetch profile" },
       { status: 500 }
@@ -43,9 +41,6 @@ export async function GET() {
   }
 }
 
-// ========================
-// ✅ UPDATE Logged-in User
-// ========================
 export async function PUT(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
@@ -90,6 +85,7 @@ export async function PUT(req: NextRequest) {
       data: updatedUser,
     });
   } catch (error) {
+    console.error("Error updating profile:", error);
     return NextResponse.json(
       { success: false, error: "Profile update failed" },
       { status: 500 }
